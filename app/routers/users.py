@@ -1,3 +1,4 @@
+from pydantic import BaseModel, ConfigDict, StrictStr
 from fastapi import APIRouter, HTTPException
 from sqlmodel import select
 
@@ -8,6 +9,12 @@ from app.models.registration import Registration
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+class UserCreate(BaseModel):
+    model_config = ConfigDict(strict=True)
+
+    username: StrictStr
+    name: StrictStr
+    email: StrictStr
 
 @router.get("")
 def get_users(session: SessionDep):
@@ -18,14 +25,20 @@ def get_users(session: SessionDep):
 
 
 @router.post("", status_code=201)
-def create_user(user: User, session: SessionDep):
+def create_user(user_data: UserCreate, session: SessionDep):
     """
     Crea un nuovo utente.
     """
-    existing_user = session.get(User, user.username)
+    existing_user = session.get(User, user_data.username)
 
     if existing_user is not None:
         raise HTTPException(status_code=400, detail="User already exists")
+
+    user = User(
+        username=user_data.username,
+        name=user_data.name,
+        email=user_data.email,
+    )
 
     session.add(user)
     session.commit()
