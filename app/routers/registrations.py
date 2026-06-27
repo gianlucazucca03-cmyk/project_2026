@@ -18,7 +18,7 @@ def get_registrations(session: SessionDep):
     return session.exec(select(Registration)).all()
 
 
-@router.delete("?username={username}&event_id={event_id}")
+@router.delete("")
 def delete_registration(username: str, event_id: int, session: SessionDep):
     """
     Elimina una registrazione tramite username ed event_id.
